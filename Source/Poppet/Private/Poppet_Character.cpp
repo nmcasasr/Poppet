@@ -5,6 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Engine.h"
+#include <GameFramework/Actor.h>
 
 // Sets default values
 APoppet_Character::APoppet_Character()
@@ -14,6 +16,8 @@ APoppet_Character::APoppet_Character()
 
 	bUserFirstPersonView = false;
 	bIsCrouched = false;
+	bIsDashing = false;
+	bCanDash = true;
 	FPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FPS_CameraComponent"));
 	FPSCameraComponent->bUsePawnControlRotation = true;
 	FPSCameraComponent->SetupAttachment(RootComponent);
@@ -68,6 +72,23 @@ void APoppet_Character::CrouchCharacter()
 	
 }
 
+void APoppet_Character::Dash()
+{
+	if (bCanDash) {
+		bIsDashing = true;
+		bCanDash = false;
+		FVector launchVector = GetActorRotation().Vector();
+		LaunchCharacter(launchVector * 3000 * FVector(1, 1, 0), false, true);
+		bIsDashing = false;
+		GetWorld()->GetTimerManager().SetTimer(dDashingCoolDown, this, &APoppet_Character::restartDash, 3.0f, false);
+	}
+}
+
+void APoppet_Character::restartDash()
+{
+	bCanDash = true;
+	GetWorldTimerManager().ClearTimer(dDashingCoolDown);
+}
 // Called every frame
 void APoppet_Character::Tick(float DeltaTime)
 {
@@ -89,6 +110,8 @@ void APoppet_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &APoppet_Character::StopJumping);
 
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &APoppet_Character::CrouchCharacter);
+
+	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &APoppet_Character::Dash);
 
 }
 

@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class UWorld;
 
 UCLASS()
 class POPPET_API APoppet_Character : public ACharacter
@@ -28,6 +29,12 @@ protected:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	bool bUserFirstPersonView;
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	bool bIsDashing;
+	bool bCanDash;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	FTimerHandle dDashingCoolDown;
 
 public:
 	// Sets default values for this character's properties
@@ -42,6 +49,8 @@ protected:
 	virtual void Jump() override;
 	virtual void StopJumping() override;
 	void CrouchCharacter();
+	void Dash();
+	void restartDash();
 
 
 public:	
