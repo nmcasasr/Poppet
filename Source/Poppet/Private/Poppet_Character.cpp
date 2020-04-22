@@ -96,6 +96,10 @@ void APoppet_Character::restartDash()
 	bCanDash = true;
 	GetWorldTimerManager().ClearTimer(dDashingCoolDown);
 }
+void APoppet_Character::RestartLevel()
+{
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+}
 // Called every frame
 void APoppet_Character::Tick(float DeltaTime)
 {
@@ -119,6 +123,8 @@ void APoppet_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &APoppet_Character::CrouchCharacter);
 
 	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &APoppet_Character::Dash);
+
+	PlayerInputComponent->BindAction("Restart", IE_Pressed, this, &APoppet_Character::RestartLevel);
 
 }
 

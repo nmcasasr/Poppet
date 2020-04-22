@@ -54,7 +54,7 @@ protected:
 	void CrouchCharacter();
 	void Dash();
 	void restartDash();
-
+	void RestartLevel();
 
 
 public:	
