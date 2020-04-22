@@ -35,6 +35,9 @@ protected:
 	bool bCanDash;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	FTimerHandle dDashingCoolDown;
+protected:
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category	= "Items")
+	FName Items;
 
 public:
 	// Sets default values for this character's properties
@@ -53,6 +56,7 @@ protected:
 	void restartDash();
 
 
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -60,5 +64,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void AddItem(FName newItem);
+
+	void DeleteItem();
+
+	bool HasKey(FName itemTag);
 
 };

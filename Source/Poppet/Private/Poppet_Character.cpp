@@ -60,13 +60,20 @@ void APoppet_Character::StopJumping()
 
 void APoppet_Character::CrouchCharacter()
 {
+
 	if (!this->bIsCrouched) {
 	Super::Crouch();
 	this->bIsCrouched = true;
+	FVector capsulePosition = GetCapsuleComponent()->GetComponentLocation();
+	GetCapsuleComponent()->SetCapsuleHalfHeight(60, false);
+	GetMesh()->SetRelativeLocation(FVector(0, 0,  -60));
 	}
 	else
 	{
 	Super::UnCrouch();
+	FVector capsulePosition = GetCapsuleComponent()->GetComponentLocation();
+	GetCapsuleComponent()->SetCapsuleHalfHeight(88, false);
+	GetMesh()->SetRelativeLocation(FVector(0, 0, -88));
 	this->bIsCrouched = false;
 	}
 	
@@ -77,8 +84,8 @@ void APoppet_Character::Dash()
 	if (bCanDash) {
 		bIsDashing = true;
 		bCanDash = false;
-		FVector launchVector = GetActorRotation().Vector();
-		LaunchCharacter(launchVector * 3000 * FVector(1, 1, 0), false, true);
+		FVector launchVector = GetActorForwardVector();
+		LaunchCharacter(launchVector * 3000, false, true);
 		bIsDashing = false;
 		GetWorld()->GetTimerManager().SetTimer(dDashingCoolDown, this, &APoppet_Character::restartDash, 3.0f, false);
 	}
@@ -113,5 +120,18 @@ void APoppet_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &APoppet_Character::Dash);
 
+}
+
+void APoppet_Character::AddItem(FName newItem)
+{
+	Items = newItem;
+}
+void APoppet_Character::DeleteItem()
+{
+	Items = "";
+}
+bool APoppet_Character::HasKey(FName itemTag)
+{
+	return Items == itemTag;
 }
 
