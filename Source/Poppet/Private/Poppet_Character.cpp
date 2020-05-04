@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine.h"
 #include <GameFramework/Actor.h>
+#include "Weapons/Poppet_Weapon.h"
 
 // Sets default values
 APoppet_Character::APoppet_Character()
@@ -35,7 +36,21 @@ APoppet_Character::APoppet_Character()
 void APoppet_Character::BeginPlay()
 {
 	Super::BeginPlay();
+	CreateInitalWeapon();
 	
+	
+}
+
+void APoppet_Character::CreateInitalWeapon()
+{
+	if (IsValid(InitialWeaponClass)) {
+		CurrentWeapon = GetWorld()->SpawnActor<APoppet_Weapon>(InitialWeaponClass, GetActorLocation(), GetActorRotation());
+		if (IsValid(CurrentWeapon))
+		{
+			CurrentWeapon->setCharacterOwner(this);
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		}
+	}
 }
 
 void APoppet_Character::MoveForward(float value)
@@ -96,10 +111,30 @@ void APoppet_Character::restartDash()
 	bCanDash = true;
 	GetWorldTimerManager().ClearTimer(dDashingCoolDown);
 }
+
 void APoppet_Character::RestartLevel()
 {
 	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }
+
+void APoppet_Character::StartShooting()
+{
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->StartShooting();
+
+	}
+}
+
+void APoppet_Character::StopShooting()
+{
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->StopShooting();
+
+	}
+}
+
 // Called every frame
 void APoppet_Character::Tick(float DeltaTime)
 {
@@ -125,6 +160,9 @@ void APoppet_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &APoppet_Character::Dash);
 
 	PlayerInputComponent->BindAction("Restart", IE_Pressed, this, &APoppet_Character::RestartLevel);
+
+	PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &APoppet_Character::StartShooting);
+	PlayerInputComponent->BindAction("Shoot", IE_Released, this, &APoppet_Character::StopShooting);
 
 }
 

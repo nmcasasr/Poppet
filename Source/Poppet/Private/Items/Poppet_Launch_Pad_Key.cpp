@@ -16,7 +16,9 @@ APoppet_Launch_Pad_Key::APoppet_Launch_Pad_Key()
 void APoppet_Launch_Pad_Key::Pickup(APoppet_Character* PickUpActor)
 {
 	Super::Pickup(PickUpActor);
+	if (!PickUpActor->HasKey(KeyTag)) {
+		PickUpActor->AddItem(KeyTag);
+		Destroy();
+	}
 
-	PickUpActor->AddItem(KeyTag);
-	Destroy();
 }

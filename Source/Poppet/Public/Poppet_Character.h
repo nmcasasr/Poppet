@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class UWorld;
+class APoppet_Weapon;
 
 UCLASS()
 class POPPET_API APoppet_Character : public ACharacter
@@ -29,15 +30,24 @@ protected:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	bool bUserFirstPersonView;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	bool bIsDashing;
 	bool bCanDash;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	FTimerHandle dDashingCoolDown;
+
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category	= "Items")
 	FName Items;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<APoppet_Weapon> InitialWeaponClass;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Weapon")
+	APoppet_Weapon* CurrentWeapon;
 
 public:
 	// Sets default values for this character's properties
@@ -47,6 +57,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void CreateInitalWeapon();
+
 	void MoveForward(float value);
 	void MoveRight(float value);
 	virtual void Jump() override;
@@ -54,7 +66,11 @@ protected:
 	void CrouchCharacter();
 	void Dash();
 	void restartDash();
+
 	void RestartLevel();
+
+	void StartShooting();
+	void StopShooting();
 
 
 public:	

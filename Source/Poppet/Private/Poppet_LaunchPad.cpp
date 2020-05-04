@@ -13,14 +13,13 @@ APoppet_LaunchPad::APoppet_LaunchPad()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	PadComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pad"));
-	PadComponent->SetupAttachment(RootComponent);
-
 	PlayerZoneColliderComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("PlayerZoneColliderComponent"));
-	PlayerZoneColliderComponent->SetupAttachment(RootComponent);
 	PlayerZoneColliderComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	PlayerZoneColliderComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 	PlayerZoneColliderComponent->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
+	RootComponent = PlayerZoneColliderComponent;
+	PadComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Pad"));
+	PadComponent->SetupAttachment(RootComponent);
 
 	PadTag = "KeyA";
 	bCanLaunch = false;
@@ -42,9 +41,7 @@ void APoppet_LaunchPad::CheckKeyFromPlayer(UPrimitiveComponent * OverlappedCompo
 	if (IsValid(OtherActor)) {
 		APoppet_Character* OverlapedCharacter = Cast<APoppet_Character>(OtherActor);
 		if (IsValid(OverlapedCharacter)) {
-			if (OverlapedCharacter->HasKey(PadTag)) {
 				LaunchPlayer(OverlapedCharacter);
-			}
 		}
 	}
 }
@@ -59,7 +56,9 @@ void APoppet_LaunchPad::Tick(float DeltaTime)
 
 void APoppet_LaunchPad::LaunchPlayer(APoppet_Character * OtherActor)
 {
-	OtherActor->LaunchCharacter(FVector(0, 0, launchPower), false, false);
+	FVector LaunchVector = FVector::UpVector*launchPower;
+	LaunchVector = FRotator(GetActorRotation()).RotateVector(LaunchVector);
+	OtherActor->LaunchCharacter(LaunchVector, false, false);
 	OtherActor->DeleteItem();
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player enter the collision!"));
 }
