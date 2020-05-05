@@ -55,7 +55,9 @@ void APoppet_Proyectile::NotifyActorBeginOverlap(AActor * OtherActor)
 		if (OtherActor->ActorHasTag(TEXT("Wall"))) {
 			FRotator rotation2 = OtherActor->GetActorRotation();
 			if (ObjectType == "KeyA") {
+			
 			APoppet_LaunchPad* CurrentProyectile = GetWorld()->SpawnActor<APoppet_LaunchPad>(LaunchPadClass, FVector(Location.X, Location.Y, Location.Z), FRotator(90, rotation.Yaw, rotation2.Roll));
+			CurrentProyectile->launchPower = 2000;
 			}
 		}
 		else if (OtherActor->ActorHasTag(TEXT("Floor")))

@@ -58,8 +58,8 @@ void APoppet_LaunchPad::LaunchPlayer(APoppet_Character * OtherActor)
 {
 	FVector LaunchVector = FVector::UpVector*launchPower;
 	LaunchVector = FRotator(GetActorRotation()).RotateVector(LaunchVector);
-	OtherActor->LaunchCharacter(LaunchVector, false, false);
-	OtherActor->DeleteItem();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player enter the collision!"));
+	OtherActor->LaunchCharacter(LaunchVector, true, true);
+	//OtherActor->DeleteItem();
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player enter the collision!"));
 }
 

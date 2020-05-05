@@ -30,12 +30,17 @@ void APoppet_Rifle::StartShooting()
 		FName tag2 = "KeyB";
 		if (PoppetCurrentCharacter->HasKey(tag1)) {
 		APoppet_Proyectile* CurrentProyectile = GetWorld()->SpawnActor<APoppet_Proyectile>(ProyectileClass, MuzzleSocketLocation, PawnRotation);
+		if (IsValid(CurrentProyectile)) {
 		CurrentProyectile->SpawnObject(tag1);
+		}
+		
 		PoppetCurrentCharacter->DeleteItem();
 		}
 		else if (PoppetCurrentCharacter->HasKey(tag2)) {
 		APoppet_Proyectile* CurrentProyectile = GetWorld()->SpawnActor<APoppet_Proyectile>(ProyectileClass, MuzzleSocketLocation, PawnRotation);
-		CurrentProyectile->SpawnObject(tag2);
+		if (IsValid(CurrentProyectile)) {
+			CurrentProyectile->SpawnObject(tag2);
+		}
 		PoppetCurrentCharacter->DeleteItem();
 		}
 		

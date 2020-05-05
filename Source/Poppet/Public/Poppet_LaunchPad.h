@@ -29,7 +29,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	bool bCanLaunch;
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, Category = "Components")
 	float launchPower;
 protected:
 	// Called when the game starts or when spawned
