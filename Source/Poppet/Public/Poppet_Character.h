@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/Actor.h"
 #include "Poppet_Character.generated.h"
 
 class UCameraComponent;
@@ -27,6 +28,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UCapsuleComponent* MeleeDetectorComponent;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	bool bUserFirstPersonView;
@@ -36,8 +40,12 @@ protected:
 	bool bIsDashing;
 	bool bCanDash;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	bool bIsKicking;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	FTimerHandle dDashingCoolDown;
-
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Melee")
+	FName MeleeSocketName;
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category	= "Items")
 	FName Items;
@@ -72,6 +80,8 @@ protected:
 	void StartShooting();
 	void StopShooting();
 
+	void StartMeele();
+	void StopMeele();
 
 public:	
 	// Called every frame
@@ -86,4 +96,8 @@ public:
 
 	bool HasKey(FName itemTag);
 
+	void setMeleeDetectorCollision(ECollisionEnabled::Type NewColissionState);
+
+	UFUNCTION()
+	void MakeMeleeAction(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 };

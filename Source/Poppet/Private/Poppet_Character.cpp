@@ -8,15 +8,17 @@
 #include "Engine.h"
 #include <GameFramework/Actor.h>
 #include "Weapons/Poppet_Weapon.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 APoppet_Character::APoppet_Character()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	MeleeSocketName = "SCK_Melee";
 	bUserFirstPersonView = false;
 	bIsCrouched = false;
+	bIsKicking = false;
 	bIsDashing = false;
 	bCanDash = true;
 	FPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FPS_CameraComponent"));
@@ -30,6 +32,14 @@ APoppet_Character::APoppet_Character()
 
 	TPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("TPS_CameraComponent"));
 	TPSCameraComponent->SetupAttachment(SpringArmComponent);
+
+	MeleeDetectorComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("MeleeDetectorComponent"));
+	MeleeDetectorComponent->SetupAttachment(GetMesh(), MeleeSocketName);
+	MeleeDetectorComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	MeleeDetectorComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	MeleeDetectorComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +47,7 @@ void APoppet_Character::BeginPlay()
 {
 	Super::BeginPlay();
 	CreateInitalWeapon();
+	MeleeDetectorComponent->OnComponentBeginOverlap.AddDynamic(this, &APoppet_Character::MakeMeleeAction);
 	
 	
 }
@@ -135,6 +146,17 @@ void APoppet_Character::StopShooting()
 	}
 }
 
+void APoppet_Character::StartMeele()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Meele Attac"));
+	bIsKicking = true;
+}
+
+void APoppet_Character::StopMeele()
+{	
+	bIsKicking = false;
+}
+
 // Called every frame
 void APoppet_Character::Tick(float DeltaTime)
 {
@@ -164,6 +186,9 @@ void APoppet_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &APoppet_Character::StartShooting);
 	PlayerInputComponent->BindAction("Shoot", IE_Released, this, &APoppet_Character::StopShooting);
 
+	PlayerInputComponent->BindAction("Melee", IE_Pressed, this, &APoppet_Character::StartMeele);
+	PlayerInputComponent->BindAction("Melee", IE_Released, this, &APoppet_Character::StopMeele);	
+
 }
 
 void APoppet_Character::AddItem(FName newItem)
@@ -177,5 +202,17 @@ void APoppet_Character::DeleteItem()
 bool APoppet_Character::HasKey(FName itemTag)
 {
 	return Items == itemTag;
+}
+
+void APoppet_Character::setMeleeDetectorCollision(ECollisionEnabled::Type NewColissionState)
+{
+	MeleeDetectorComponent->SetCollisionEnabled(NewColissionState);
+}
+
+void APoppet_Character::MakeMeleeAction(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	if (IsValid(OtherActor)) {
+		OtherActor->Destroy();
+	}
 }
 
