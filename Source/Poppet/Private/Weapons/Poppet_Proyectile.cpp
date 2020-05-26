@@ -8,6 +8,7 @@
 #include "..\..\Public\Weapons\Poppet_Proyectile.h"
 #include "Poppet_LaunchPad.h"
 #include "Poppet_SpeedPad.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APoppet_Proyectile::APoppet_Proyectile()
@@ -51,7 +52,7 @@ void APoppet_Proyectile::NotifyActorBeginOverlap(AActor * OtherActor)
 		Super::NotifyActorBeginOverlap(OtherActor);
 		FVector Location = GetActorLocation();
 		FRotator rotation = GetActorRotation();
-
+		UE_LOG(LogTemp, Warning, TEXT("Enter Collision Proyectile"));
 		if (OtherActor->ActorHasTag(TEXT("Wall"))) {
 			FRotator rotation2 = OtherActor->GetActorRotation();
 			if (ObjectType == "KeyA") {
@@ -70,7 +71,13 @@ void APoppet_Proyectile::NotifyActorBeginOverlap(AActor * OtherActor)
 			APoppet_SpeedPad* CurrentProyectile = GetWorld()->SpawnActor<APoppet_SpeedPad>(SpeedPadClass, FVector(Location.X, Location.Y, Location.Z), FRotator(0,rotation.Yaw,0));
 			}
 		
-		}		
+		}
+		else if (OtherActor->ActorHasTag(TEXT("Barrel")) || OtherActor->ActorHasTag(TEXT("Mine")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Enter Collision Proyectile Barrel"));
+			AController* controler = this->GetInstigatorController();
+			UGameplayStatics::ApplyDamage(OtherActor, 100.0f, controler, this, DamageType);
+		}
 		Destroy();
 	}
 

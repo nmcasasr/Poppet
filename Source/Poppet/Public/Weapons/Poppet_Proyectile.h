@@ -10,6 +10,7 @@ class UProjectileMovementComponent;
 class USphereComponent;
 class APoppet_LaunchPad;
 class APoppet_SpeedPad;
+class UDamageType;
 UCLASS()
 class POPPET_API APoppet_Proyectile : public AActor
 {
@@ -31,6 +32,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	TSubclassOf<APoppet_SpeedPad> SpeedPadClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TSubclassOf<UDamageType> DamageType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	FName ObjectType;

@@ -11,6 +11,9 @@ class UCameraComponent;
 class USpringArmComponent;
 class UWorld;
 class APoppet_Weapon;
+class APoppet_GameMode;
+class UPoppet_HealthComponent;
+class UParticleSystem;
 
 UCLASS()
 class POPPET_API APoppet_Character : public ACharacter
@@ -31,6 +34,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCapsuleComponent* MeleeDetectorComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPoppet_HealthComponent* HealthComponent;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	bool bUserFirstPersonView;
@@ -49,7 +55,13 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category	= "Items")
 	FName Items;
-
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float InitialBurnTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	float BurnTime;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	FTimerHandle dBurnCoolDown;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<APoppet_Weapon> InitialWeaponClass;
@@ -57,6 +69,12 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "Weapon")
 	APoppet_Weapon* CurrentWeapon;
 
+	APoppet_GameMode* GameModeReference;
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	UParticleSystem* BurnEffect;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	FName BurnSocketName;
 public:
 	// Sets default values for this character's properties
 	APoppet_Character();
@@ -83,6 +101,11 @@ protected:
 	void StartMeele();
 	void StopMeele();
 
+	void CheckDamage();
+
+
+	UFUNCTION()
+		void OnHealthChange(UPoppet_HealthComponent* MyHealthComponent, AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -97,6 +120,8 @@ public:
 	bool HasKey(FName itemTag);
 
 	void setMeleeDetectorCollision(ECollisionEnabled::Type NewColissionState);
+
+	void StartBurning();
 
 	UFUNCTION()
 	void MakeMeleeAction(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);

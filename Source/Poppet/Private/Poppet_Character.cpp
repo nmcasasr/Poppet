@@ -9,6 +9,10 @@
 #include <GameFramework/Actor.h>
 #include "Weapons/Poppet_Weapon.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/Poppet_HealthComponent.h"
+#include "Core/Poppet_GameMode.h"
+#include "Core/Poppet_BarrelDamage.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 APoppet_Character::APoppet_Character()
@@ -16,6 +20,7 @@ APoppet_Character::APoppet_Character()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	MeleeSocketName = "SCK_Melee";
+	BurnSocketName = "SCK_Burn";
 	bUserFirstPersonView = false;
 	bIsCrouched = false;
 	bIsKicking = false;
@@ -39,7 +44,9 @@ APoppet_Character::APoppet_Character()
 	MeleeDetectorComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	MeleeDetectorComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	HealthComponent = CreateDefaultSubobject<UPoppet_HealthComponent>(TEXT("HealthComponent"));
 
+	InitialBurnTime = 600.0f;
 }
 
 // Called when the game starts or when spawned
@@ -47,9 +54,12 @@ void APoppet_Character::BeginPlay()
 {
 	Super::BeginPlay();
 	CreateInitalWeapon();
+	GameModeReference = Cast<APoppet_GameMode>(GetWorld()->GetAuthGameMode());
 	MeleeDetectorComponent->OnComponentBeginOverlap.AddDynamic(this, &APoppet_Character::MakeMeleeAction);
 	
+	HealthComponent->OnHealthChangeDelegate.AddDynamic(this, &APoppet_Character::OnHealthChange);
 	
+	BurnTime = InitialBurnTime;
 }
 
 void APoppet_Character::CreateInitalWeapon()
@@ -157,6 +167,38 @@ void APoppet_Character::StopMeele()
 	bIsKicking = false;
 }
 
+void APoppet_Character::OnHealthChange(UPoppet_HealthComponent * MyHealthComponent, AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
+{
+	const UPoppet_BarrelDamage* BarrelDamage = Cast<UPoppet_BarrelDamage>(DamageType);
+	if (IsValid(BarrelDamage)) {
+		GetWorld()->GetTimerManager().SetTimer(dBurnCoolDown, this, &APoppet_Character::CheckDamage, 0.1f, true);
+		StartBurning();
+	}
+	if (HealthComponent->IsDead()) {
+		if (IsValid(GameModeReference)) {
+			GameModeReference->GameOver(this);
+		}
+	}
+}
+void APoppet_Character::CheckDamage()
+{
+	if (HealthComponent->IsDead()) {
+		if (IsValid(GameModeReference)) {
+			GameModeReference->GameOver(this);
+		}
+	}
+	if (--BurnTime <= 0) {
+		GetWorld()->GetTimerManager().ClearTimer(dBurnCoolDown);
+		BurnTime = InitialBurnTime;
+	}
+}
+void APoppet_Character::StartBurning()
+{
+	if (IsValid(BurnEffect)) {
+		UGameplayStatics::SpawnEmitterAttached(BurnEffect,this->GetMesh(), BurnSocketName);
+
+	}
+}
 // Called every frame
 void APoppet_Character::Tick(float DeltaTime)
 {
