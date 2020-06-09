@@ -50,6 +50,9 @@ void APoppet_SpeedPad::StopPlayer(UPrimitiveComponent * OverlappedComponent, AAc
 	if (IsValid(OtherActor)) {
 		APoppet_Character* OverlapedCharacter = Cast<APoppet_Character>(OtherActor);
 		if (IsValid(OverlapedCharacter)) {
+			if (OverlapedCharacter->bIsUsingPowerUp) {
+				return;
+			}
 			OverlapedCharacter->GetCharacterMovement()->MaxWalkSpeed = 400;
 		}
 	}

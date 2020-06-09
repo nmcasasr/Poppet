@@ -43,6 +43,12 @@ void APoppet_Rifle::StartShooting()
 		}
 		PoppetCurrentCharacter->DeleteItem();
 		}
+		else if (PoppetCurrentCharacter->bIsUsingPowerUp) {
+			APoppet_Proyectile* CurrentProyectile = GetWorld()->SpawnActor<APoppet_Proyectile>(ProyectileClass, MuzzleSocketLocation, PawnRotation);
+			if (IsValid(CurrentProyectile)) {
+				CurrentProyectile->SpawnObject(tag1);
+			}
+		}
 		
 	}
 	}

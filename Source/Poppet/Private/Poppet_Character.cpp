@@ -13,6 +13,8 @@
 #include "Core/Poppet_GameMode.h"
 #include "Core/Poppet_BarrelDamage.h"
 #include "Particles/ParticleSystem.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/CheatManager.h"
 
 // Sets default values
 APoppet_Character::APoppet_Character()
@@ -47,6 +49,10 @@ APoppet_Character::APoppet_Character()
 	HealthComponent = CreateDefaultSubobject<UPoppet_HealthComponent>(TEXT("HealthComponent"));
 
 	InitialBurnTime = 600.0f;
+	MaxPowerUpDuration = 10.0f;
+	bIsUsingPowerUp = false;
+	PlayRate = 1.0f;
+	PowerUpPlayRate = 2.0f;
 }
 
 // Called when the game starts or when spawned
@@ -60,6 +66,9 @@ void APoppet_Character::BeginPlay()
 	HealthComponent->OnHealthChangeDelegate.AddDynamic(this, &APoppet_Character::OnHealthChange);
 	
 	BurnTime = InitialBurnTime;
+	if (IsValid(GetMesh())) {
+		MyAnimInstance = GetMesh()->GetAnimInstance();
+	}
 }
 
 void APoppet_Character::CreateInitalWeapon()
@@ -159,11 +168,16 @@ void APoppet_Character::StopShooting()
 void APoppet_Character::StartMeele()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Meele Attac"));
+	if (bIsUsingPowerUp) {
+	GetWorldSettings()->SetTimeDilation(0.4f);
+	}
+	
 	bIsKicking = true;
 }
 
 void APoppet_Character::StopMeele()
-{	
+{
+	GetWorldSettings()->SetTimeDilation(1.0f);
 	bIsKicking = false;
 }
 
@@ -203,6 +217,9 @@ void APoppet_Character::StartBurning()
 void APoppet_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (bIsUsingPowerUp) {
+		UpdatePowerUpDuration(DeltaTime);
+	}
 
 }
 
@@ -256,5 +273,42 @@ void APoppet_Character::MakeMeleeAction(UPrimitiveComponent * OverlappedComponen
 	if (IsValid(OtherActor)) {
 		OtherActor->Destroy();
 	}
+}
+
+void APoppet_Character::GainPowerUp()
+{
+	if (bIsUsingPowerUp) {
+		return;
+	}
+	if (IsValid(MyAnimInstance) && IsValid(PowerUpMontage)) {
+		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+		const float PowerUpAnimationDuration = MyAnimInstance->Montage_Play(PowerUpMontage, PlayRate);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_BeginPowerUp, this, &APoppet_Character::BeginPowerUp, PowerUpAnimationDuration, false);
+	}
+	else {
+		BeginPowerUp();
+	}
+	BP_StartPowerUp();
+}
+
+void APoppet_Character::UpdatePowerUpDuration(float Value)
+{
+	CurrentPowerUpDuration = FMath::Clamp(CurrentPowerUpDuration - Value, 0.0f, MaxPowerUpDuration);
+
+	if (CurrentPowerUpDuration == 0.0f) {
+		bIsUsingPowerUp = false;
+		GetCharacterMovement()->MaxWalkSpeed = 400;
+		GetWorldSettings()->SetTimeDilation(1.0f);
+		PlayRate = 1.0f;
+		BP_StopPowerUp();
+	}
+}
+
+void APoppet_Character::BeginPowerUp()
+{
+	CurrentPowerUpDuration = MaxPowerUpDuration;
+	GetCharacterMovement()->MaxWalkSpeed = 2000.0f;
+	PlayRate = PowerUpPlayRate;
+	bIsUsingPowerUp = true;
 }
 

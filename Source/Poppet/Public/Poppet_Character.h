@@ -5,15 +5,19 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/CheatManager.h"
 #include "Poppet_Character.generated.h"
 
 class UCameraComponent;
 class USpringArmComponent;
 class UWorld;
+class UCheatManager;
 class APoppet_Weapon;
 class APoppet_GameMode;
 class UPoppet_HealthComponent;
 class UParticleSystem;
+class UAnimInstance;
+class UAnimMontage;
 
 UCLASS()
 class POPPET_API APoppet_Character : public ACharacter
@@ -76,6 +80,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	FName BurnSocketName;
 public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PowerUp")
+	bool bCanUsePowerUp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PowerUp")
+	bool bIsUsingPowerUp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PowerUp|Time", meta = (ClampMin = 0.0, UIMin = 0.0))
+	float MaxPowerUpDuration;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PowerUp|Time")
+	float CurrentPowerUpDuration;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PowerUp|Time", meta = (ClampMin = 0.0, UIMin = 0.0))
+	float PowerUpPlayRate;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PowerUp|Time")
+	float PlayRate;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* PowerUpMontage;
+
+	UAnimInstance* MyAnimInstance;
+
+	FTimerHandle TimerHandle_BeginPowerUp;
+public:
 	// Sets default values for this character's properties
 	APoppet_Character();
 
@@ -125,4 +148,15 @@ public:
 
 	UFUNCTION()
 	void MakeMeleeAction(UPrimitiveComponent * OverlappedComponent, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
+	UFUNCTION(BlueprintCallable)
+	void GainPowerUp();
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void BP_StartPowerUp();
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void BP_StopPowerUp();
+
+	void UpdatePowerUpDuration(float Value);
+
+	void BeginPowerUp();
 };

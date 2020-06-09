@@ -24,7 +24,7 @@ public:
 	APoppet_Mine();
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UPoppet_HealthComponent* HealthComponent;
+	UPoppet_HealthComponent	* HealthComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* MineComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
