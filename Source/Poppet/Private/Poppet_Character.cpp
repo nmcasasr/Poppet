@@ -15,6 +15,8 @@
 #include "Particles/ParticleSystem.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/CheatManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "Core/Poppet_GameInstance.h"
 
 // Sets default values
 APoppet_Character::APoppet_Character()
@@ -60,7 +62,11 @@ void APoppet_Character::BeginPlay()
 {
 	Super::BeginPlay();
 	CreateInitalWeapon();
+
 	GameModeReference = Cast<APoppet_GameMode>(GetWorld()->GetAuthGameMode());
+
+	GameInstanceReference = Cast<UPoppet_GameInstance>(GetWorld()->GetGameInstance());
+
 	MeleeDetectorComponent->OnComponentBeginOverlap.AddDynamic(this, &APoppet_Character::MakeMeleeAction);
 	
 	HealthComponent->OnHealthChangeDelegate.AddDynamic(this, &APoppet_Character::OnHealthChange);
@@ -192,13 +198,22 @@ void APoppet_Character::OnHealthChange(UPoppet_HealthComponent * MyHealthCompone
 		if (IsValid(GameModeReference)) {
 			GameModeReference->GameOver(this);
 		}
+		if (IsValid(GameInstanceReference))
+		{
+			GameInstanceReference->AddPlayerDeathToCounter();
+		}
 	}
 }
 void APoppet_Character::CheckDamage()
 {
 	if (HealthComponent->IsDead()) {
+		GetWorld()->GetTimerManager().ClearTimer(dBurnCoolDown);
 		if (IsValid(GameModeReference)) {
 			GameModeReference->GameOver(this);
+		}
+		if (IsValid(GameInstanceReference))
+		{
+			GameInstanceReference->AddPlayerDeathToCounter();
 		}
 	}
 	if (--BurnTime <= 0) {
@@ -247,6 +262,8 @@ void APoppet_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	PlayerInputComponent->BindAction("Melee", IE_Pressed, this, &APoppet_Character::StartMeele);
 	PlayerInputComponent->BindAction("Melee", IE_Released, this, &APoppet_Character::StopMeele);	
+
+	PlayerInputComponent->BindAction("Menu", IE_Pressed, this, &APoppet_Character::GoToMainMenu);
 
 }
 
@@ -312,3 +329,11 @@ void APoppet_Character::BeginPowerUp()
 	bIsUsingPowerUp = true;
 }
 
+void APoppet_Character::GoToMainMenu()
+{
+	if (IsValid(GameInstanceReference)) {
+		GameInstanceReference->SaveData();
+	}
+	UGameplayStatics::OpenLevel(GetWorld(), FName("Menu"));
+
+}

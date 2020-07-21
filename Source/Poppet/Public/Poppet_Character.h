@@ -18,6 +18,7 @@ class UPoppet_HealthComponent;
 class UParticleSystem;
 class UAnimInstance;
 class UAnimMontage;
+class UPoppet_GameInstance;
 
 UCLASS()
 class POPPET_API APoppet_Character : public ACharacter
@@ -74,6 +75,8 @@ protected:
 	APoppet_Weapon* CurrentWeapon;
 
 	APoppet_GameMode* GameModeReference;
+
+	UPoppet_GameInstance* GameInstanceReference;
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	UParticleSystem* BurnEffect;
@@ -125,6 +128,8 @@ protected:
 	void StopMeele();
 
 	void CheckDamage();
+
+	void GoToMainMenu();
 
 
 	UFUNCTION()
