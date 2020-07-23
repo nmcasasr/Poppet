@@ -21,6 +21,7 @@ APoppet_HealerBot::APoppet_HealerBot()
 	RootComponent = MainMeshComponent;
 	MinDistanceToPlayer = 150.0f;
 	ForceMagnitude = 3000.0f;
+	maxPlayerDistance = 600.0f;
 	Item = "KeyA";
 	TraceParamName = "ChargeBeam_Target";
 	TraceParamNameSource = "ChargeBeam_Source";
@@ -45,12 +46,13 @@ void APoppet_HealerBot::BeginPlay()
 
 FVector APoppet_HealerBot::GetNextPathPoint()
 {
-	if (IsValid(PlayerCharacter))
+	FVector PlayerLocation = PlayerCharacter->GetActorLocation();
+	float DistanceToPlayer = (GetActorLocation() - PlayerLocation).Size();
+	if (IsValid(PlayerCharacter) && (DistanceToPlayer < maxPlayerDistance))
 	{
 		UNavigationPath* NavigationPath = UNavigationSystemV1::FindPathToActorSynchronously(GetWorld(), GetActorLocation(), PlayerCharacter);
 		if (NavigationPath->PathPoints.Num() > 1)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("VALID CHARACTER"));
 			return NavigationPath->PathPoints[1];
 		}
 		else {
@@ -75,7 +77,6 @@ void APoppet_HealerBot::Tick(float DeltaTime)
 		FVector ForceDirection = NextPathPoint - GetActorLocation();
 		ForceDirection.Normalize();
 		ForceDirection *= ForceMagnitude;
-		UE_LOG(LogTemp, Warning, TEXT("Add force"));
 		MainMeshComponent->AddForce(ForceDirection, NAME_None ,true);
 	}
 	//DrawDebugSphere(GetWorld(), NextPathPoint, 30.0f, 15, FColor::Purple, false, 0.0f, 0, 1.0f);
@@ -84,6 +85,7 @@ void APoppet_HealerBot::Tick(float DeltaTime)
 		FVector PlayerLocation = PlayerCharacter->GetActorLocation();
 		float DistanceToPlayer = (GetActorLocation() - PlayerLocation).Size();
 		if (DistanceToPlayer <= MinDistanceToPlayer) {
+			TracerComponent->ActivateSystem(true);
 			PlayerCharacter->AddItem(Item);
 			if (IsValid(TraceEffect)) {
 				//UParticleSystemComponent* TracerComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, GetActorLocation());
@@ -94,7 +96,11 @@ void APoppet_HealerBot::Tick(float DeltaTime)
 				}
 			}
 		}
+		else {
+			TracerComponent->ActivateSystem();
+		}
 	}
+	
 }
 
 
