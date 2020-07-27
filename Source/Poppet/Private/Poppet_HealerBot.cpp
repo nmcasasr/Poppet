@@ -9,6 +9,7 @@
 #include "NavigationSystem/Public/NavigationPath.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Items/Poppet_ItemSpawner.h"
 // Sets default values
 APoppet_HealerBot::APoppet_HealerBot()
 {
@@ -19,13 +20,15 @@ APoppet_HealerBot::APoppet_HealerBot()
 	MainMeshComponent->SetCanEverAffectNavigation(false);
 	MainMeshComponent->SetSimulatePhysics(true);
 	RootComponent = MainMeshComponent;
-	MinDistanceToPlayer = 150.0f;
-	ForceMagnitude = 3000.0f;
+	MinDistanceToPlayer = 250.0f;
+	ForceMagnitude = 5000.0f;
 	maxPlayerDistance = 600.0f;
 	Item = "KeyA";
 	TraceParamName = "ChargeBeam_Target";
 	TraceParamNameSource = "ChargeBeam_Source";
 	SocketName = "particle_socket";
+	bIsInRange = false;
+	LifeTime = 10.0f;
 
 }
 
@@ -39,9 +42,9 @@ void APoppet_HealerBot::BeginPlay()
 	{
 		PlayerCharacter = Cast<APoppet_Character>(Character);
 	}
-
+	InitLifeTime = LifeTime;
 	NextPathPoint = GetNextPathPoint();
-	
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_Spawn, this, &APoppet_HealerBot::DestroyItem, 1.0f, true);
 }
 
 FVector APoppet_HealerBot::GetNextPathPoint()
@@ -63,6 +66,19 @@ FVector APoppet_HealerBot::GetNextPathPoint()
 
 }
 
+void APoppet_HealerBot::DestroyItem()
+{
+	LifeTime--;
+	if (LifeTime <= 0.0f) {
+		if (IsValid(MySpawner)) {
+			MySpawner->DeleteItem();
+		}
+		
+		Destroy();
+	}
+	
+}
+
 // Called every frame
 void APoppet_HealerBot::Tick(float DeltaTime)
 {
@@ -79,7 +95,6 @@ void APoppet_HealerBot::Tick(float DeltaTime)
 		ForceDirection *= ForceMagnitude;
 		MainMeshComponent->AddForce(ForceDirection, NAME_None ,true);
 	}
-	//DrawDebugSphere(GetWorld(), NextPathPoint, 30.0f, 15, FColor::Purple, false, 0.0f, 0, 1.0f);
 	if (IsValid(PlayerCharacter))
 	{
 		FVector PlayerLocation = PlayerCharacter->GetActorLocation();
@@ -87,9 +102,9 @@ void APoppet_HealerBot::Tick(float DeltaTime)
 		if (DistanceToPlayer <= MinDistanceToPlayer) {
 			TracerComponent->ActivateSystem(true);
 			PlayerCharacter->AddItem(Item);
+			bIsInRange = true;
+			LifeTime = InitLifeTime;
 			if (IsValid(TraceEffect)) {
-				//UParticleSystemComponent* TracerComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, GetActorLocation());
-				//UParticleSystemComponent* TracerComponent = UGameplayStatics::SpawnEmitterAttached(TraceEffect, MainMeshComponent, SocketName);
 				if (IsValid(TracerComponent)) {
 					TracerComponent->SetVectorParameter(TraceParamName, PlayerLocation);
 					TracerComponent->SetVectorParameter(TraceParamNameSource, GetActorLocation());
@@ -97,7 +112,9 @@ void APoppet_HealerBot::Tick(float DeltaTime)
 			}
 		}
 		else {
-			TracerComponent->ActivateSystem();
+			TracerComponent->SetVectorParameter(TraceParamName, GetActorLocation());
+			TracerComponent->SetVectorParameter(TraceParamNameSource, GetActorLocation());
+			bIsInRange = false;
 		}
 	}
 	

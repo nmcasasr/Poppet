@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class APoppet_Character;
 class UParticleSystem;
 class UParticleSystemComponent;
+class APoppet_ItemSpawner;
 UCLASS()
 class POPPET_API APoppet_HealerBot : public APawn
 {
@@ -57,6 +58,19 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	UParticleSystemComponent* TracerComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Time", meta = (UIMin = 0.1, ClampMin = 0.1))
+	float LifeTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Time", meta = (UIMin = 0.1, ClampMin = 0.1))
+	float InitLifeTime;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Spawner")
+	APoppet_ItemSpawner* MySpawner;
+
+	FTimerHandle TimerHandle_Spawn;
+
+	bool bIsInRange;
 public:
 	// Sets default values for this pawn's properties
 	APoppet_HealerBot();
@@ -66,10 +80,14 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Navigation")
-		FVector GetNextPathPoint();
+	FVector GetNextPathPoint();
+
+	void DestroyItem();
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void SetSpawner(APoppet_ItemSpawner* Spawner) { MySpawner = Spawner; };
 
 };
