@@ -319,6 +319,7 @@ void APoppet_Character::UpdatePowerUpDuration(float Value)
 		GetCharacterMovement()->MaxWalkSpeed = 400;
 		GetWorldSettings()->SetTimeDilation(1.0f);
 		PlayRate = 1.0f;
+		OnItemUpdateDelegate.Broadcast("");
 		BP_StopPowerUp();
 	}
 }
