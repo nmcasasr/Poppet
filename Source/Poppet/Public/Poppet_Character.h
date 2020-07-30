@@ -20,6 +20,8 @@ class UAnimInstance;
 class UAnimMontage;
 class UPoppet_GameInstance;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemUpdateSignature, FName, CurrentItem);
+
 UCLASS()
 class POPPET_API APoppet_Character : public ACharacter
 {
@@ -105,6 +107,9 @@ public:
 	// Sets default values for this character's properties
 	APoppet_Character();
 
+	UPROPERTY(BlueprintAssignable)
+	FOnItemUpdateSignature OnItemUpdateDelegate;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -164,4 +169,6 @@ public:
 	void UpdatePowerUpDuration(float Value);
 
 	void BeginPowerUp();
+
+	UPoppet_HealthComponent* GetHealthComponent() { return HealthComponent; };
 };

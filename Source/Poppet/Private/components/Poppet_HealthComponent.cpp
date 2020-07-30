@@ -20,6 +20,11 @@ UPoppet_HealthComponent::UPoppet_HealthComponent()
 }
 
 
+void UPoppet_HealthComponent::UpdateInitialHealth()
+{
+	OnHealthUpdateDelegate.Broadcast(Health, MaxHealth);
+}
+
 // Called when the game starts
 void UPoppet_HealthComponent::BeginPlay()
 {
@@ -31,7 +36,7 @@ void UPoppet_HealthComponent::BeginPlay()
 	if (IsValid(MyOwner)) {
 	MyOwner->OnTakeAnyDamage.AddDynamic(this, &UPoppet_HealthComponent::TakingDamage);
 	}
-	
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_UpdateInitialHealth, this, &UPoppet_HealthComponent::UpdateInitialHealth, 0.2f, false);
 	
 }
 
@@ -52,6 +57,7 @@ void UPoppet_HealthComponent::TakingDamage(AActor * DamagedActor, float Damage, 
 		bIsDead = true;
 	}
 	OnHealthChangeDelegate.Broadcast(this, DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
+	OnHealthUpdateDelegate.Broadcast(Health, MaxHealth);
 	if (bLogs) {
 		UE_LOG(LogTemp, Log, TEXT("My health is: %s"), *FString::SanitizeFloat(Health));
 	}
@@ -69,6 +75,7 @@ void UPoppet_HealthComponent::TakeBurnDamage()
 		GetWorld()->GetTimerManager().ClearTimer(dBurningTime);
 		BurnDamageTime = InitialBurnDamageTime;
 	}
+	OnHealthUpdateDelegate.Broadcast(Health, MaxHealth);
 }
 
 

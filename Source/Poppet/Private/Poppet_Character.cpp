@@ -270,10 +270,12 @@ void APoppet_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 void APoppet_Character::AddItem(FName newItem)
 {
 	Items = newItem;
+	OnItemUpdateDelegate.Broadcast(newItem);
 }
 void APoppet_Character::DeleteItem()
 {
 	Items = "";
+	OnItemUpdateDelegate.Broadcast("");
 }
 bool APoppet_Character::HasKey(FName itemTag)
 {
@@ -311,7 +313,7 @@ void APoppet_Character::GainPowerUp()
 void APoppet_Character::UpdatePowerUpDuration(float Value)
 {
 	CurrentPowerUpDuration = FMath::Clamp(CurrentPowerUpDuration - Value, 0.0f, MaxPowerUpDuration);
-
+	OnItemUpdateDelegate.Broadcast("PowerUp");
 	if (CurrentPowerUpDuration == 0.0f) {
 		bIsUsingPowerUp = false;
 		GetCharacterMovement()->MaxWalkSpeed = 400;

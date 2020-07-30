@@ -7,6 +7,7 @@
 #include "Poppet_HealthComponent.generated.h"
 class UWorld;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangeSignature, UPoppet_HealthComponent*, HealthComponent, AActor *, DamagedActor, float, Damage, const UDamageType *, DamageType, AController *, InstigatedBy, AActor *, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthUpdateSignature, float, CurrentHealth, float, MaxHealth);
 UCLASS( ClassGroup=(Poppet), meta=(BlueprintSpawnableComponent) )
 class POPPET_API UPoppet_HealthComponent : public UActorComponent
 {
@@ -28,9 +29,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	FTimerHandle dBurningTime;
+
+	FTimerHandle TimerHandle_UpdateInitialHealth;
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChangeSignature OnHealthChangeDelegate;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthUpdateSignature OnHealthUpdateDelegate;
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debug")
 	bool bLogs;
@@ -45,6 +51,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsDead() const { return bIsDead; };
+
+	void UpdateInitialHealth();
 
 protected:
 	// Called when the game starts

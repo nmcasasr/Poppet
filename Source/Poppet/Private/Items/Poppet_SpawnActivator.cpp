@@ -1,12 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "..\..\Public\Items\Poppet_SpawnActivator.h"
 #include "Components/BoxComponent.h"
 #include "Items/Poppet_ItemSpawner.h"
 #include "Poppet_Character.h"
-#include "..\..\Public\Items\Poppet_SpawnActivator.h"
 #include <Engine/Engine.h>
-
 // Sets default values
 APoppet_SpawnActivator::APoppet_SpawnActivator()
 {
