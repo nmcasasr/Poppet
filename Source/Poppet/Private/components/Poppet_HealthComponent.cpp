@@ -47,7 +47,9 @@ void UPoppet_HealthComponent::TakingDamage(AActor * DamagedActor, float Damage, 
 		return;
 	}
 	if (IsValid(BarrelDamage)) {
-		GetWorld()->GetTimerManager().SetTimer(dBurningTime, this, &UPoppet_HealthComponent::TakeBurnDamage, 1.0f, true);
+		FTimerDelegate TimerDel;
+		TimerDel.BindUFunction(this, FName("TakeBurnDamage"), DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
+		GetWorld()->GetTimerManager().SetTimer(dBurningTime, TimerDel, 1.0f, true);
 	}
 	
 	Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
@@ -64,7 +66,7 @@ void UPoppet_HealthComponent::TakingDamage(AActor * DamagedActor, float Damage, 
 	//
 }
 
-void UPoppet_HealthComponent::TakeBurnDamage()
+void UPoppet_HealthComponent::TakeBurnDamage(AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
 	Health = FMath::Clamp(Health - 20.0f, 0.0f, MaxHealth);
 	if (Health == 0.0f) {
@@ -75,6 +77,7 @@ void UPoppet_HealthComponent::TakeBurnDamage()
 		GetWorld()->GetTimerManager().ClearTimer(dBurningTime);
 		BurnDamageTime = InitialBurnDamageTime;
 	}
+	OnHealthChangeDelegate.Broadcast(this, DamagedActor, Damage, DamageType, InstigatedBy, DamageCauser);
 	OnHealthUpdateDelegate.Broadcast(Health, MaxHealth);
 }
 

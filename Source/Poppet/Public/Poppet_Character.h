@@ -19,6 +19,8 @@ class UParticleSystem;
 class UAnimInstance;
 class UAnimMontage;
 class UPoppet_GameInstance;
+class UAudioComponent;
+class USoundCue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemUpdateSignature, FName, CurrentItem);
 
@@ -43,6 +45,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UPoppet_HealthComponent* HealthComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UAudioComponent* StepSoundComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UAudioComponent* VoiceSoundComponent;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
@@ -103,6 +111,13 @@ public:
 	UAnimInstance* MyAnimInstance;
 
 	FTimerHandle TimerHandle_BeginPowerUp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundCue* DeadSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundCue* HurtSound;
+
 public:
 	// Sets default values for this character's properties
 	APoppet_Character();
@@ -171,4 +186,9 @@ public:
 	void BeginPowerUp();
 
 	UPoppet_HealthComponent* GetHealthComponent() { return HealthComponent; };
+
+	void PlayStepSound();
+
+	void PlayVoiceSound(USoundCue* VoiceSound);
+
 };

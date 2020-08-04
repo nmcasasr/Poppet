@@ -9,7 +9,7 @@
 
 class UStaticMeshComponent;
 class APoppet_HealerBot;
-
+class USoundCue;
 UCLASS()
 class POPPET_API APoppet_ItemSpawner : public AActor
 {
@@ -25,6 +25,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawner")
 	FVector SpawnPoint;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundCue* SpawnSound;
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawner")
@@ -58,5 +61,7 @@ public:
 	void DeleteItem() { CurrentBotsCounter--; };
 
 	void SetActive(bool ActiveState) { bIsActive = ActiveState; };
+
+	void PlaySound();
 
 };

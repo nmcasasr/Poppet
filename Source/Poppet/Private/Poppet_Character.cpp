@@ -16,6 +16,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/CheatManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "components/AudioComponent.h"
+#include "Sound/SoundCue.h"
 #include "Core/Poppet_GameInstance.h"
 
 // Sets default values
@@ -49,6 +51,12 @@ APoppet_Character::APoppet_Character()
 	MeleeDetectorComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	HealthComponent = CreateDefaultSubobject<UPoppet_HealthComponent>(TEXT("HealthComponent"));
+
+	StepSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("StepSoundComponent"));
+	StepSoundComponent->SetupAttachment(RootComponent);
+
+	VoiceSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("VoiceSoundComponent"));
+	VoiceSoundComponent->SetupAttachment(RootComponent);
 
 	InitialBurnTime = 600.0f;
 	MaxPowerUpDuration = 10.0f;
@@ -157,7 +165,11 @@ void APoppet_Character::StartShooting()
 {
 	if (IsValid(CurrentWeapon))
 	{
-		CurrentWeapon->StartShooting();
+		FName tag1 = "KeyA";
+		FName tag2 = "KeyB";
+		if (HasKey(tag1) || HasKey(tag2) || bIsUsingPowerUp) {
+			CurrentWeapon->StartShooting();
+		}
 
 	}
 }
@@ -190,11 +202,18 @@ void APoppet_Character::StopMeele()
 void APoppet_Character::OnHealthChange(UPoppet_HealthComponent * MyHealthComponent, AActor * DamagedActor, float Damage, const UDamageType * DamageType, AController * InstigatedBy, AActor * DamageCauser)
 {
 	const UPoppet_BarrelDamage* BarrelDamage = Cast<UPoppet_BarrelDamage>(DamageType);
+	// PlayVoiceSound(HurtSound);
+	// UE_LOG(LogTemp, Warning, TEXT("Barrel Damage"));
+	if (!HealthComponent->IsDead()) {
+		// UE_LOG(LogTemp, Warning, TEXT("Barrel Damage2"));
+		PlayVoiceSound(HurtSound);
+	}
 	if (IsValid(BarrelDamage)) {
 		GetWorld()->GetTimerManager().SetTimer(dBurnCoolDown, this, &APoppet_Character::CheckDamage, 0.1f, true);
 		StartBurning();
 	}
 	if (HealthComponent->IsDead()) {
+		PlayVoiceSound(DeadSound);
 		if (IsValid(GameModeReference)) {
 			GameModeReference->GameOver(this);
 		}
@@ -206,7 +225,7 @@ void APoppet_Character::OnHealthChange(UPoppet_HealthComponent * MyHealthCompone
 }
 void APoppet_Character::CheckDamage()
 {
-	if (HealthComponent->IsDead()) {
+	/*if (HealthComponent->IsDead()) {
 		GetWorld()->GetTimerManager().ClearTimer(dBurnCoolDown);
 		if (IsValid(GameModeReference)) {
 			GameModeReference->GameOver(this);
@@ -215,15 +234,17 @@ void APoppet_Character::CheckDamage()
 		{
 			GameInstanceReference->AddPlayerDeathToCounter();
 		}
-	}
+	}*/
 	if (--BurnTime <= 0) {
 		GetWorld()->GetTimerManager().ClearTimer(dBurnCoolDown);
 		BurnTime = InitialBurnTime;
 	}
+
 }
 void APoppet_Character::StartBurning()
 {
 	if (IsValid(BurnEffect)) {
+		PlayVoiceSound(HurtSound);
 		UGameplayStatics::SpawnEmitterAttached(BurnEffect,this->GetMesh(), BurnSocketName);
 
 	}
@@ -330,6 +351,21 @@ void APoppet_Character::BeginPowerUp()
 	GetCharacterMovement()->MaxWalkSpeed = 2000.0f;
 	PlayRate = PowerUpPlayRate;
 	bIsUsingPowerUp = true;
+}
+
+void APoppet_Character::PlayStepSound()
+{
+	StepSoundComponent->Play();
+}
+
+void APoppet_Character::PlayVoiceSound(USoundCue* VoiceSound)
+{
+	if (!IsValid(VoiceSound)) {
+		UE_LOG(LogTemp, Warning, TEXT("Not valid Sound"));
+		return;
+	}
+	VoiceSoundComponent->SetSound(VoiceSound);
+	VoiceSoundComponent->Play();
 }
 
 void APoppet_Character::GoToMainMenu()

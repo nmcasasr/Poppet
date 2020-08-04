@@ -11,6 +11,9 @@ class APoppet_Character;
 class UParticleSystem;
 class UParticleSystemComponent;
 class APoppet_ItemSpawner;
+class UAudioComponent;
+class USoundCue;
+
 UCLASS()
 class POPPET_API APoppet_HealerBot : public APawn
 {
@@ -19,7 +22,13 @@ class POPPET_API APoppet_HealerBot : public APawn
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UStaticMeshComponent* MainMeshComponent;
+	UStaticMeshComponent* MainMeshComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundCue* ConnectionSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundCue* LoseConnectionSound;
 
 protected:
 
@@ -68,9 +77,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Spawner")
 	APoppet_ItemSpawner* MySpawner;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UAudioComponent* ConnectionSoundComponent;
+
 	FTimerHandle TimerHandle_Spawn;
 
 	bool bIsInRange;
+
+	bool bIsPlaying;
 public:
 	// Sets default values for this pawn's properties
 	APoppet_HealerBot();
@@ -89,5 +103,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetSpawner(APoppet_ItemSpawner* Spawner) { MySpawner = Spawner; };
+
+	void PlaySound(USoundCue* VoiceSound);
+
+	void StopSound();
 
 };

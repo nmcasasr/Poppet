@@ -4,6 +4,7 @@
 #include "Poppet_Barrel.h"
 #include "Components/Poppet_HealthComponent.h"
 #include "..\..\Public\Items\Poppet_Barrel.h"
+#include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 
@@ -36,6 +37,7 @@ void APoppet_Barrel::OnHealthChange(UPoppet_HealthComponent * MyHealthComponent,
 		if (IsValid(ExplosionEffect)) {
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 		}
+		PlaySound(ExplosionSound, true, GetActorLocation());
 		Destroy();
 	}
 }
@@ -45,5 +47,20 @@ void APoppet_Barrel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void APoppet_Barrel::PlaySound(USoundCue * SoundCue, bool bIs3D, FVector SoundLocation)
+{
+	if (!IsValid(SoundCue))
+	{
+		return;
+	}
+	if (bIs3D)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundCue, SoundLocation);
+	}
+	else {
+		UGameplayStatics::PlaySound2D(GetWorld(), SoundCue);
+	}
 }
 

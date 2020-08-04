@@ -6,6 +6,7 @@
 #include "Components/Poppet_HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
+#include "Sound/SoundCue.h"
 #include "Poppet_Character.h"
 #include "Engine.h"
 #include <GameFramework/Actor.h>
@@ -86,6 +87,22 @@ void APoppet_Mine::ActorDistance(APoppet_Character* OtherActor)
 		if (IsValid(ExplosionEffect)) {
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, InitialPosition);
 		}
+		PlaySound(ExplosionSound, true, GetActorLocation());
 		Destroy();
+	}
+}
+
+void APoppet_Mine::PlaySound(USoundCue * SoundCue, bool bIs3D, FVector SoundLocation)
+{
+	if (!IsValid(SoundCue))
+	{
+		return;
+	}
+	if (bIs3D)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundCue, SoundLocation);
+	}
+	else {
+		UGameplayStatics::PlaySound2D(GetWorld(), SoundCue);
 	}
 }

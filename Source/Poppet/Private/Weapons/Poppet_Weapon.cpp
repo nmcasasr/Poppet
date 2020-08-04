@@ -3,8 +3,10 @@
 
 #include "Poppet_Weapon.h"
 #include "Poppet_Character.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
-
+#include "..\..\Public\Weapons\Poppet_Weapon.h"
 // Sets default values
 APoppet_Weapon::APoppet_Weapon()
 {
@@ -30,6 +32,7 @@ void APoppet_Weapon::Tick(float DeltaTime)
 void APoppet_Weapon::StartShooting()
 {
 	BP_StartShooting();
+	PlaySound(ShotSound);
 }
 
 void APoppet_Weapon::StopShooting()
@@ -45,5 +48,21 @@ void APoppet_Weapon::setCharacterOwner(ACharacter * NewOwner)
 		CurrentOwnerCharacter = NewOwner;
 	}
 
+}
+
+void APoppet_Weapon::PlaySound(USoundCue * SoundCue, bool bIs3D, FVector SoundLocation)
+{
+	if (!IsValid(SoundCue))
+	{
+		return;
+	}
+	if (bIs3D)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundCue, SoundLocation);
+	}
+	else {
+		UGameplayStatics::PlaySound2D(GetWorld(), SoundCue);
+	}
+	
 }
 

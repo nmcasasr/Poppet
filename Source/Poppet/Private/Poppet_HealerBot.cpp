@@ -9,6 +9,8 @@
 #include "NavigationSystem/Public/NavigationPath.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "components/AudioComponent.h"
+#include "Sound/SoundCue.h"
 #include "Items/Poppet_ItemSpawner.h"
 // Sets default values
 APoppet_HealerBot::APoppet_HealerBot()
@@ -20,6 +22,8 @@ APoppet_HealerBot::APoppet_HealerBot()
 	MainMeshComponent->SetCanEverAffectNavigation(false);
 	MainMeshComponent->SetSimulatePhysics(true);
 	RootComponent = MainMeshComponent;
+	ConnectionSoundComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("ConnectionSoundComponent"));
+	ConnectionSoundComponent->SetupAttachment(RootComponent);
 	MinDistanceToPlayer = 250.0f;
 	ForceMagnitude = 5000.0f;
 	maxPlayerDistance = 600.0f;
@@ -29,6 +33,7 @@ APoppet_HealerBot::APoppet_HealerBot()
 	SocketName = "particle_socket";
 	bIsInRange = false;
 	LifeTime = 10.0f;
+	bIsPlaying = false;
 
 }
 
@@ -106,18 +111,43 @@ void APoppet_HealerBot::Tick(float DeltaTime)
 			LifeTime = InitLifeTime;
 			if (IsValid(TraceEffect)) {
 				if (IsValid(TracerComponent)) {
+					PlaySound(ConnectionSound);
 					TracerComponent->SetVectorParameter(TraceParamName, PlayerLocation);
 					TracerComponent->SetVectorParameter(TraceParamNameSource, GetActorLocation());
 				}
 			}
 		}
 		else {
+			StopSound();
 			TracerComponent->SetVectorParameter(TraceParamName, GetActorLocation());
 			TracerComponent->SetVectorParameter(TraceParamNameSource, GetActorLocation());
 			bIsInRange = false;
 		}
 	}
 	
+}
+
+void APoppet_HealerBot::PlaySound(USoundCue * VoiceSound)
+{
+	if (!IsValid(VoiceSound)) {
+		UE_LOG(LogTemp, Warning, TEXT("Not valid Sound"));
+		return;
+	}
+	if (!bIsPlaying) {
+	UE_LOG(LogTemp, Warning, TEXT("Valid Sound"));
+	ConnectionSoundComponent->SetSound(VoiceSound);
+	ConnectionSoundComponent->Play();
+	bIsPlaying = true;
+	}
+	
+}
+
+void APoppet_HealerBot::StopSound()
+{
+	bIsPlaying = false;
+	ConnectionSoundComponent->SetSound(LoseConnectionSound);
+	ConnectionSoundComponent->Play();
+	ConnectionSoundComponent->Stop();
 }
 
 

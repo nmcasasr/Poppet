@@ -60,8 +60,8 @@ protected:
 
 	UFUNCTION()
 	void TakingDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
-
-	void TakeBurnDamage();
+	UFUNCTION()
+	void TakeBurnDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 
 

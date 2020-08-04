@@ -7,6 +7,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Poppet_SpectatingCamera.h"
+#include "Sound/SoundCue.h"
 #include "..\..\Public\Core\Poppet_GameMode.h"
 #include <GameFramework/Actor.h>
 
@@ -18,6 +19,7 @@ void APoppet_GameMode::BeginPlay()
 }
 void APoppet_GameMode::GameOver(APoppet_Character* Character)
 {
+	OnGameOverDelegate.Broadcast();
 	Character->GetMovementComponent()->StopMovementImmediately();
 	Character->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -25,14 +27,17 @@ void APoppet_GameMode::GameOver(APoppet_Character* Character)
 
 	//Character->SetLifeSpan(4.0f);
 	Character->DisableInput(nullptr);
+	PlaySound(GameOverSound);
 	MoveCameraToSpectatingPoint(Character, GameOverCamera);
 	GetWorld()->GetTimerManager().SetTimer(dRestartCoolDown, this, &APoppet_GameMode::RestartLevel, 3.0f, false);
 }
 void APoppet_GameMode::Victory(APoppet_Character* Character)
 {
+	OnVictoryeDelegate.Broadcast();
 	Character->DisableInput(nullptr);
-
+	PlaySound(VictorySound);
 	MoveCameraToSpectatingPoint(Character, VictoryCamera);
+	GetWorld()->GetTimerManager().SetTimer(dRestartCoolDown, this, &APoppet_GameMode::goToMenu, 3.0f, false);
 }
 void APoppet_GameMode::SetupSpectatingCameras()
 {
@@ -75,6 +80,21 @@ void APoppet_GameMode::RestartLevel()
 {
 	GetWorldTimerManager().ClearTimer(dRestartCoolDown);
 	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+}
+
+void APoppet_GameMode::goToMenu()
+{
+	GetWorldTimerManager().ClearTimer(dRestartCoolDown);
+	UGameplayStatics::OpenLevel(GetWorld(), FName("Menu"));
+}
+
+void APoppet_GameMode::PlaySound(USoundCue * SoundCue)
+{
+	if (!IsValid(SoundCue))
+	{
+		return;
+	}
+	UGameplayStatics::PlaySound2D(GetWorld(), SoundCue);
 }
 
 

@@ -11,6 +11,10 @@
  */
 class APoppet_Character;
 class APoppet_SpectatingCamera;
+class USoundCue;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnVictorySignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOverSignature);
 
 UCLASS()
 class POPPET_API APoppet_GameMode : public AGameModeBase
@@ -29,13 +33,24 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	FTimerHandle dRestartCoolDown;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundCue* VictorySound;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundCue* GameOverSound;
 public:
 	UFUNCTION()
 	void Victory(APoppet_Character* Character);
 
 	UFUNCTION()
 	void GameOver(APoppet_Character* Character);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnVictorySignature OnVictoryeDelegate;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnGameOverSignature OnGameOverDelegate;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void BP_GameOver();
@@ -51,5 +66,9 @@ protected:
 	void MoveCameraToSpectatingPoint(APoppet_Character* Character,APoppet_SpectatingCamera* SpectatingCamera);
 
 	void RestartLevel();
+
+	void goToMenu();
+
+	void PlaySound(USoundCue* SoundCue);
 
 };

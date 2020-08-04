@@ -3,6 +3,8 @@
 
 #include "Poppet_Item.h"
 #include "Components/SphereComponent.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 #include "..\..\Public\Items\Poppet_Item.h"
 #include "Poppet_Character.h"
 // Sets default values
@@ -38,6 +40,7 @@ void APoppet_Item::Tick(float DeltaTime)
 void APoppet_Item::Pickup(APoppet_Character* PickUpActor)
 {
 	BP_Pickup(PickUpActor);
+	PlaySound(PickUpSound);
 }
 
 void APoppet_Item::NotifyActorBeginOverlap(AActor * OtherActor)
@@ -51,5 +54,20 @@ void APoppet_Item::NotifyActorBeginOverlap(AActor * OtherActor)
 		}
 	}
 	
+}
+
+void APoppet_Item::PlaySound(USoundCue * SoundCue, bool bIs3D, FVector SoundLocation)
+{
+	if (!IsValid(SoundCue))
+	{
+		return;
+	}
+	if (bIs3D)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundCue, SoundLocation);
+	}
+	else {
+		UGameplayStatics::PlaySound2D(GetWorld(), SoundCue);
+	}
 }
 
